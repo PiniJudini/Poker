@@ -15,17 +15,11 @@ public class Cartas {
 	}
 
 	public void mostrar() {
-		if (this.color.equals("Negro"))
-			System.out.println(this.valor + " de " + this.palo);
-		else
-			System.err.println(this.valor + " de " + this.palo);
+		System.out.println(this.valor + " de " + this.palo + " " + this.color);
 	}
 
 	public void mostrarCentro() {
-		if (this.color.equals("Negro"))
-			System.out.print(this.valor + " de " + this.palo + " - ");
-		else
-			System.err.print(this.valor + " de " + this.palo + " - ");
+		System.out.print(this.valor + " de " + this.palo + " " + this.color + " - ");
 	}
 
 	public static Cartas[] Cartillas(Cartas[] baraja) {
@@ -88,10 +82,10 @@ public class Cartas {
 		Cartas doceT = new Cartas(12, "Tréboles", "Negro");
 		Cartas treceT = new Cartas(13, "Tréboles", "Negro");
 		Cartas aT = new Cartas(14, "Tréboles", "Negro");
-		Cartas[] barajilla = { dosC, tresC, cuatroC, cincoC, seisC, sieteC, ochoC, nueveC, diezC, onceC, doceC, treceC,
-				aC, dosD, tresD, cuatroD, cincoD, seisD, sieteD, ochoD, nueveD, diezD, onceD, doceD, treceD, aD, dosP,
-				tresP, cuatroP, cincoP, seisP, sieteP, ochoP, nueveP, diezP, onceP, doceP, treceP, aP, dosT, tresT,
-				cuatroT, cincoT, seisT, sieteT, ochoT, nueveT, diezT, onceT, doceT, treceT, aT };
+		Cartas[] barajilla = { dosT, ochoC, doceC, cuatroP, aP, seisD, tresC, doceD, sieteT, seisC, cincoT, ochoD,
+				cuatroC, tresT, diezC, aD, nueveP, sieteC, cincoC, treceP, cuatroD, dosC, ochoP, tresP, nueveC, onceT,
+				sieteP, cincoD, diezT, aC, treceT, doceP, dosD, ochoT, onceP, treceC, seisT, nueveT, cuatroT, diezP,
+				onceD, tresD, doceT, aT, seisP, cincoP, sieteD, nueveD, dosP, onceC, treceD, diezD };
 		for (int i = 0; i < baraja.length; i++) {
 			baraja[i] = barajilla[i];
 		}
@@ -123,6 +117,8 @@ public class Cartas {
 
 		int dineroPersona = 100;
 		int dineroPC = 100;
+		int inicialRonda = 0;
+		int inicialRondaPC = 0;
 		int dineroGanador = 0;
 		int rondaexterna = 0;
 		// Hacer la escalera
@@ -145,6 +141,8 @@ public class Cartas {
 				manoPersona[i].mostrar();
 			System.out.println();
 
+			inicialRonda = dineroPersona;
+			inicialRondaPC = dineroPC;
 			do {
 				Scanner teclado = new Scanner(System.in);
 				boolean correcto = false;
@@ -155,18 +153,18 @@ public class Cartas {
 				System.out.println();
 
 				if (ronda >= 2) {
-					if (manoPC[0].valor == manoPC[1].valor || manoPC[0].palo == manoPC[1].palo)
+					if (manoPC[0].valor == manoPC[1].valor || manoPC[0].palo == manoPC[1].palo || ronda>=3)
 						jugadaPC = (int) (Math.random() * (2 - 1 + 1) + 1);
 					else
-						jugadaPC = (int) (Math.random() * (3 - 1 + 1) + 1);
+						jugadaPC = (int) (Math.random() * (8 - 1 + 1) + 1);
 
-					if (jugadaPC == 2) {
+					if (jugadaPC == 2 || jugadaPC == 4 || jugadaPC == 6) {
 						boolean correcto1 = false;
 						int importe = 0;
-						importe = comprobarImportePC(importe, correcto1, dineroPC);
+						importe = comprobarImportePC(importe, correcto1, dineroPC, apuestaPC);
 						apuestaPC = apuestaPC + importe;
 						System.out.println("P(ancho)C sube!!!");
-					} else if (jugadaPC == 1) {
+					} else if (jugadaPC == 1 || jugadaPC == 5 || jugadaPC == 7 || jugadaPC == 8) {
 						// apuestaPC se queda igual
 						System.out.println("P(ancho)C ha pasado");
 					} else {
@@ -177,6 +175,10 @@ public class Cartas {
 					}
 				} else
 					apuestaPC = 5;
+				if(ronda==1)
+					System.out.println("El dinero de P(ancho)C es: " + (dineroPC-apuestaPC));
+				else
+					System.out.println("El dinero de P(ancho)C es: " + dineroPC);
 				System.out.println("Tu dinero actual es: " + dineroPersona);
 				System.out.println("Apuesta PC: " + apuestaPC);
 
@@ -196,10 +198,10 @@ public class Cartas {
 					} else if (entrada.equals("subir") || entrada.equals("s")) {
 						boolean correcto1 = false;
 						int importe = 0;
-						importe = comprobarImportePersona(importe, correcto1, apuesta, apuestaPC);
+						importe = comprobarImportePersona(importe, correcto1, apuesta, apuestaPC, dineroPersona);
 						jugadaPC = (int) (Math.random() * (3 - 2 + 1) + 2);
 						System.out.println("Apuesta central: " + (apuestaPC + apuesta));
-						if (jugadaPC == 2) {
+						if (jugadaPC == 2 || jugadaPC == 4 || jugadaPC == 6) {
 							apuesta = apuesta + importe;
 							apuestaPC = apuesta;
 							System.out.println("P(ancho)C ha igualado");
@@ -216,14 +218,12 @@ public class Cartas {
 				}
 
 				if (ronda != 4) {
-					dineroPersona = dineroPersona - apuesta;
-					dineroPC = dineroPC - apuestaPC;
+					dineroPersona = inicialRonda - apuesta;
+					dineroPC = inicialRondaPC - apuestaPC;
 					System.out.println("Siguiente ronda!!!");
 				}
 				ronda++;
 				System.out.println("");
-				System.out.println(dineroPersona);
-				System.out.println(dineroPC);
 			} while (ronda < 4);
 
 			// Baraja del rival
@@ -253,7 +253,7 @@ public class Cartas {
 					centroPersona);
 			puntuacionFinalPC = puntuacionPC(contadorColorPC, contadorEscaleraPC, contadorNumerosPC, puntuacionFinalPC,
 					centroPC);
-			if (jugadaPC != 3 && entrada.equals("foldeo")==false && entrada.equals("f")==false) {
+			if (jugadaPC != 3 && entrada.equals("foldeo") == false && entrada.equals("f") == false) {
 				System.out.println("Tu puntuación es: " + puntuacionFinal);
 				System.out.println("La puntuación de P(ancho)C es: " + puntuacionFinalPC);
 
@@ -266,18 +266,10 @@ public class Cartas {
 						manoPC, manoPersona);
 				if (veredicto.equals("Persona")) {
 					System.out.println("Persona gana!!!");
-					if (rondaexterna == 1) {
-						dineroPersona = dineroPersona + apuesta + apuestaPC;
-					} else {
-						dineroPersona = dineroPersona + apuesta + apuestaPC;
-					}
+					dineroPersona = dineroPersona + apuesta + apuestaPC;
 				} else {
 					System.out.println("P(ancho)C gana!!!");
-					if (rondaexterna == 1) {
-						dineroPC = dineroPC + apuesta + apuestaPC;
-					} else {
-						dineroPC = dineroPC + apuesta + dineroPC;
-					}
+					dineroPC = dineroPC + apuesta + dineroPC;
 				}
 			}
 		} while (dineroPC > 0 || dineroPersona > 0);
@@ -297,11 +289,11 @@ public class Cartas {
 		} while (correcto == false);
 		return entrada;
 	}
-	
-	public static int comprobarImportePC(int importe, boolean correcto1, int dineroPC) {
+
+	public static int comprobarImportePC(int importe, boolean correcto1, int dineroPC, int apuestaPC) {
 		do {
 			importe = (int) (Math.random() * (dineroPC / 2 - 1 + 1) + 1);
-			if (importe % 2 == 0)
+			if (importe % 2 == 0 && apuestaPC+importe<=dineroPC)
 				correcto1 = true;
 			else
 				correcto1 = false;
@@ -309,13 +301,13 @@ public class Cartas {
 		return importe;
 	}
 
-	public static int comprobarImportePersona(int importe, boolean correcto1, int apuesta, int apuestaPC) {
+	public static int comprobarImportePersona(int importe, boolean correcto1, int apuesta, int apuestaPC, int dineroPersona) {
 		do {
 			Scanner teclado2 = new Scanner(System.in);
 			System.out.print("Cuánto quieres subir? ");
 			try {
 				importe = teclado2.nextInt();
-				if (importe % 2 == 0 && (apuesta + importe)>apuestaPC)
+				if (importe % 2 == 0 && (apuesta + importe) > apuestaPC && apuesta+importe<=dineroPersona)
 					correcto1 = true;
 				else {
 					correcto1 = false;
@@ -552,6 +544,117 @@ public class Cartas {
 		return ganador;
 	}
 }
+/*
+ * public static int contadorcentro(int contadorcentro, Cartas[] manoPersona,
+ * Cartas[] centro) { Cartas[] centro2 = centro; for(int i=0; i<centro.length;
+ * i++) { for(int o=i+1; o<centro.length; o++) {
+ * if(centro[i].valor==centro[o].valor) contadorcentro++; } } return
+ * contadorcentro; }
+ * 
+ * public static int contadorPersona(int contador, Cartas[] manoPersona,
+ * Cartas[] centro) {
+ * 
+ * for(int i=0; i<centro.length; i++) {
+ * if(manoPersona[0].valor==centro[i].valor) contador++;
+ * if(manoPersona[1].valor==centro[i].valor) contador++; }
+ * 
+ * if(contador==2) contador = 2; else if(contador==1 && contadorcentro(contador,
+ * manoPersona, centro)==2) contador += (contadorcentro(contador, manoPersona,
+ * centro)-1); else contador += contadorcentro(contador, manoPersona, centro);
+ * 
+ * if(manoPersona[0].valor==manoPersona[1].valor) contador++;
+ * 
+ * return contador; }
+ * 
+ * public static int contadorPC(int contadorPC, Cartas[] manoPC, Cartas[]
+ * centro) { for(int i=0; i<centro.length; i++) {
+ * if(manoPC[0].valor==centro[i].valor) contadorPC++;
+ * if(manoPC[1].valor==centro[i].valor) contadorPC++; }
+ * 
+ * if(contadorPC==2) contadorPC = 2; else if(contadorPC==1 &&
+ * contadorcentro(contadorPC, manoPC, centro)==2) contadorPC +=
+ * (contadorcentro(contadorPC, manoPC, centro)-1); else contadorPC +=
+ * contadorcentro(contadorPC, manoPC, centro);
+ * 
+ * if(manoPC[0].valor==manoPC[1].valor) contadorPC++;
+ * 
+ * return contadorPC; }
+ * 
+ * public static void comprobarPersona(int contadorcolor, Cartas[] manoPersona,
+ * Cartas[] centro) { switch (contadorPersona(contadorcolor, manoPersona,
+ * centro)) { case 0: { System.out.println("No tienes nada"); break; } case 1: {
+ * System.out.println("Tienes pareja"); break; } case 2: {
+ * System.out.println("Tienes trio"); break; } case 3: {
+ * System.out.println("TIENES UN PUTO POKERRR"); break; } } }
+ * 
+ * // ¿Qué has dicho? if (entrada.equals("foldeo") || entrada.equals("f")) {
+ * ronda = 4; System.out.println("Eres un cagao"); } else if
+ * (entrada.equals("subir") || entrada.equals("s")) {
+ * System.out.print("Cuánto quieres subir? "); int subida = teclado.nextInt();
+ * inicialPersona = inicialPersona - subida; } else if
+ * (entrada.equals("igualar") || entrada.equals("i")) { int igualada =
+ * inicialPersona - inicialPC; inicialPersona = inicialPersona - igualada; }
+ * else { ronda = 4; System.err.println("No sabes jugar"); }
+ * System.out.println(""); ronda += 1;
+ * 
+ * comprobarParejas(contadorNumeros, centroPersona);
+ * comprobarEscalera(contadorEscalera, centroPersona);
+ * comprobarColor(contadorColor, centroPersona);
+ * 
+ * comprobarParejasPC(contadorNumerosPC, centroPC);
+ * comprobarEscaleraPC(contadorEscaleraPC, centroPC);
+ * comprobarColorPC(contadorColorPC, centroPC); /* public static int
+ * contadorcentro(int contadorcentro, Cartas[] manoPersona, Cartas[] centro) {
+ * Cartas[] centro2 = centro; for(int i=0; i<centro.length; i++) { for(int
+ * o=i+1; o<centro.length; o++) { if(centro[i].valor==centro[o].valor)
+ * contadorcentro++; } } return contadorcentro; }
+ * 
+ * public static int contadorPersona(int contador, Cartas[] manoPersona,
+ * Cartas[] centro) {
+ * 
+ * for(int i=0; i<centro.length; i++) {
+ * if(manoPersona[0].valor==centro[i].valor) contador++;
+ * if(manoPersona[1].valor==centro[i].valor) contador++; }
+ * 
+ * if(contador==2) contador = 2; else if(contador==1 && contadorcentro(contador,
+ * manoPersona, centro)==2) contador += (contadorcentro(contador, manoPersona,
+ * centro)-1); else contador += contadorcentro(contador, manoPersona, centro);
+ * 
+ * if(manoPersona[0].valor==manoPersona[1].valor) contador++;
+ * 
+ * return contador; }
+ * 
+ * public static int contadorPC(int contadorPC, Cartas[] manoPC, Cartas[]
+ * centro) { for(int i=0; i<centro.length; i++) {
+ * if(manoPC[0].valor==centro[i].valor) contadorPC++;
+ * if(manoPC[1].valor==centro[i].valor) contadorPC++; }
+ * 
+ * if(contadorPC==2) contadorPC = 2; else if(contadorPC==1 &&
+ * contadorcentro(contadorPC, manoPC, centro)==2) contadorPC +=
+ * (contadorcentro(contadorPC, manoPC, centro)-1); else contadorPC +=
+ * contadorcentro(contadorPC, manoPC, centro);
+ * 
+ * if(manoPC[0].valor==manoPC[1].valor) contadorPC++;
+ * 
+ * return contadorPC; }
+ * 
+ * public static void comprobarPersona(int contadorcolor, Cartas[] manoPersona,
+ * Cartas[] centro) { switch (contadorPersona(contadorcolor, manoPersona,
+ * centro)) { case 0: { System.out.println("No tienes nada"); break; } case 1: {
+ * System.out.println("Tienes pareja"); break; } case 2: {
+ * System.out.println("Tienes trio"); break; } case 3: {
+ * System.out.println("TIENES UN PUTO POKERRR"); break; } } }
+ * 
+ * // ¿Qué has dicho? if (entrada.equals("foldeo") || entrada.equals("f")) {
+ * ronda = 4; System.out.println("Eres un cagao"); } else if
+ * (entrada.equals("subir") || entrada.equals("s")) {
+ * System.out.print("Cuánto quieres subir? "); int subida = teclado.nextInt();
+ * inicialPersona = inicialPersona - subida; } else if
+ * (entrada.equals("igualar") || entrada.equals("i")) { int igualada =
+ * inicialPersona - inicialPC; inicialPersona = inicialPersona - igualada; }
+ * else { ronda = 4; System.err.println("No sabes jugar"); }
+ * System.out.println(""); ronda += 1;
+ */
 /*
  * public static int contadorcentro(int contadorcentro, Cartas[] manoPersona,
  * Cartas[] centro) { Cartas[] centro2 = centro; for(int i=0; i<centro.length;
